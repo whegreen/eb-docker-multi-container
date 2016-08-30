@@ -1,0 +1,112 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "volumes": [
+    {
+      "name": "php-app",
+      "host": {
+        "sourcePath": "/var/app/current/php-app"
+      }
+    },
+    {
+      "name": "limakilo-ecommerce",
+      "host": {
+        "sourcePath": "/var/app/current/limakilo-ecommerce"
+      }
+    },
+    {
+      "name": "nginx-proxy-static",
+      "host": {
+        "sourcePath": "/var/app/current/proxy/html"
+      }
+    },
+    {
+      "name": "nginx-proxy-cert",
+      "host": {
+        "sourcePath": "/var/app/current/proxy/certificate"
+      }
+    },
+    {
+      "name": "nginx-proxy-conf",
+      "host": {
+        "sourcePath": "/var/app/current/proxy/conf.d"
+      }
+    }
+  ],
+  "containerDefinitions": [
+    {
+      "name": "php-app",
+      "image": "php:5.6-apache",
+      "essential": true,
+      "memory": 128,
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-php-app",
+          "containerPath": "/var/log/apache2"
+        },
+        {
+          "sourceVolume": "php-app",
+          "containerPath": "/var/www/html",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "name": "limakilo-ecommerce",
+      "image": "whegreen/limakilo-ecommerce",
+      "essential": true,
+      "memory": 256,
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-limakilo-ecommerce",
+          "containerPath": "/usr/local/limakilo-ecommerce/logs"
+        },
+        {
+          "sourceVolume": "limakilo-ecommerce",
+          "containerPath": "/usr/local/limakilo-ecommerce/webapps/ROOT",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "name": "nginx-proxy",
+      "image": "nginx",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        },
+        {
+          "hostPort": 443,
+          "containerPort": 443
+        }
+      ],
+      "links": [
+        "php-app",
+        "limakilo-ecommerce"
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-nginx-proxy",
+          "containerPath": "/var/log/nginx"
+        },
+        {
+          "sourceVolume": "nginx-proxy-static",
+          "containerPath": "/usr/share/nginx/html",
+          "readOnly": true
+        },
+        {
+          "sourceVolume": "nginx-proxy-cert",
+          "containerPath": "/usr/share/nginx/certificate",
+          "readOnly": true
+        },
+        {
+          "sourceVolume": "nginx-proxy-conf",
+          "containerPath": "/etc/nginx/conf.d",
+          "readOnly": true
+        }
+      ]
+    }
+  ]
+}
