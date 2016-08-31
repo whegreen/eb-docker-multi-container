@@ -52,9 +52,12 @@
     },
     {
       "name": "limakilo-ecommerce",
-      "image": "whegreen/limakilo-ecommerce",
+      "image": "whegreen/limakilo-ecommerce:clean",
       "essential": true,
       "memory": 256,
+      "command": [
+                "/bin/bash", "boot.sh"
+            ],
       "mountPoints": [
         {
           "sourceVolume": "awseb-logs-limakilo-ecommerce",
