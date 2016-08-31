@@ -2,6 +2,12 @@
   "AWSEBDockerrunVersion": 2,
   "volumes": [
     {
+      "name": "php-app",
+      "host": {
+        "sourcePath": "/var/app/current/php-app"
+      }
+    },
+    {
       "name": "limakilo-ecommerce",
       "host": {
         "sourcePath": "/var/app/current/limakilo-ecommerce"
@@ -28,10 +34,27 @@
   ],
   "containerDefinitions": [
     {
+      "name": "php-app",
+      "image": "php:5.6-apache",
+      "essential": true,
+      "memory": 128,
+      "mountPoints": [
+        {
+          "sourceVolume": "awseb-logs-php-app",
+          "containerPath": "/var/log/apache2"
+        },
+        {
+          "sourceVolume": "php-app",
+          "containerPath": "/var/www/html",
+          "readOnly": true
+        }
+      ]
+    },
+    {
       "name": "limakilo-ecommerce",
       "image": "whegreen/limakilo-ecommerce:clean",
       "essential": true,
-      "memory": 768,
+      "memory": 256,
       "command": [
                 "/bin/bash", "boot.sh"
             ],
@@ -63,6 +86,7 @@
         }
       ],
       "links": [
+        "php-app",
         "limakilo-ecommerce"
       ],
       "mountPoints": [
